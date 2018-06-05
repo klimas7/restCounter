@@ -1,8 +1,5 @@
 package pl.klimas7.rest.counter;
 
-
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,8 +17,8 @@ public class ApiController {
         return counters.count(word);
     }
 
-    @GetMapping("/badCounter/{word}")
-    public String badCounter(@PathVariable String word) {
+    @GetMapping("/badCount/{word}")
+    public String badCount(@PathVariable String word) {
         return counters.badCount(word);
     }
 }
