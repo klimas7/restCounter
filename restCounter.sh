@@ -16,8 +16,10 @@ start() {
 
 stop() {
     processPID=$(ps aux | grep java | grep restCounter | awk '{print $2}')
-    echo "kill restCounter process PID: "$processPID
-    kill -9 $processPID 2>&1 > /dev/null
+    if [ "$processPID" != "" ]; then
+        echo "kill restCounter process PID: "$processPID
+        kill -9 $processPID 2>&1 > /dev/null
+    fi
 }
 
 case $command in
