@@ -1,7 +1,6 @@
 package pl.klimas7.rest.counter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
