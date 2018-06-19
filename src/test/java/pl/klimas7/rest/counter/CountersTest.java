@@ -1,8 +1,11 @@
 package pl.klimas7.rest.counter;
 
+import static pl.klimas7.rest.counter.Utils.format;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -104,5 +107,28 @@ public class CountersTest {
             }
             return counters.badCount(NAME + threadCount);
         };
+    }
+
+    @Test
+    public void initializeCounterTest() throws InterruptedException, ExecutionException {
+        int nThreads = 64;
+        int timeout = 60000;
+
+
+        long startTime = System.currentTimeMillis();
+        ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
+        while (false || (System.currentTimeMillis() - startTime) < timeout) {
+            String word = UUID.randomUUID().toString();
+            Callable<String> task = () -> counters.badCount(word);
+            List<Callable<String>> tasks = Collections.nCopies(nThreads, task);
+            executorService.invokeAll(tasks);
+
+            Future<String> future = executorService.submit(task);
+            String nextCount = future.get();
+            String expectedNextCount = format(word, nThreads + 1);
+            if (!nextCount.equals(expectedNextCount)) {
+                Assert.assertEquals(expectedNextCount, nextCount);
+            }
+        }
     }
 }
