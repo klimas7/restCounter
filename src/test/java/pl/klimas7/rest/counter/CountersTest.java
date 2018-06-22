@@ -117,9 +117,9 @@ public class CountersTest {
 
         long startTime = System.currentTimeMillis();
         ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
-        while (false || (System.currentTimeMillis() - startTime) < timeout) {
+        while ((System.currentTimeMillis() - startTime) < timeout) {
             String word = UUID.randomUUID().toString();
-            Callable<String> task = () -> counters.badCount(word);
+            Callable<String> task = () -> counters.count(word);
             List<Callable<String>> tasks = Collections.nCopies(nThreads, task);
             executorService.invokeAll(tasks);
 
