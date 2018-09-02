@@ -19,6 +19,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -28,7 +29,8 @@ public class CountersTest {
     private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
     private final String NAME = "Threads_";
     @Autowired
-    private Counters counters;
+    @Qualifier("safeCounter")
+    private Counter safeCounter;
 
     @Test
     public void test01Thread() throws InterruptedException, ExecutionException {
@@ -94,22 +96,23 @@ public class CountersTest {
     private Callable<String> getGoodTask(int threadCount) {
         return () -> {
             for (int i = 0; i < 99; i++) {
-                counters.count(NAME + threadCount);
+                safeCounter.count(NAME + threadCount);
             }
-            return counters.count(NAME + threadCount);
+            return safeCounter.count(NAME + threadCount);
         };
     }
 
     private Callable<String> getBadTask(int threadCount) {
         return () -> {
             for (int i = 0; i < 99; i++) {
-                counters.badCount(NAME + threadCount);
+                safeCounter.count(NAME + threadCount);
             }
-            return counters.badCount(NAME + threadCount);
+            return safeCounter.count(NAME + threadCount);
         };
     }
 
     @Test
+    @Ignore
     public void initializeCounterTest() throws InterruptedException, ExecutionException {
         int nThreads = 64;
         int timeout = 60000;
@@ -119,7 +122,7 @@ public class CountersTest {
         ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
         while ((System.currentTimeMillis() - startTime) < timeout) {
             String word = UUID.randomUUID().toString();
-            Callable<String> task = () -> counters.count(word);
+            Callable<String> task = () -> safeCounter.count(word);
             List<Callable<String>> tasks = Collections.nCopies(nThreads, task);
             executorService.invokeAll(tasks);
 
