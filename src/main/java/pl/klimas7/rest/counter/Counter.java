@@ -6,5 +6,5 @@ public interface Counter {
      * @param word which we count
      * @return Eg: word: 0000003
      */
-    String count(String word);
+    CountResult count(String word);
 }

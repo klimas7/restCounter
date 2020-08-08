@@ -12,9 +12,9 @@ public class UnsafeCounter implements Counter {
     private Map<String, Long> counters = new HashMap<>();
 
     @Override
-    public String count(String word) {
+    public CountResult count(String word) {
         Long counter = counters.computeIfAbsent(word, val -> 1L);
         counters.put(word, counter + 1);
-        return format(word, counter);
+        return CountResult.of(word, counter);
     }
 }

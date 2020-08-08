@@ -13,8 +13,8 @@ public class HalfSafeCounter implements Counter {
     private Map<String, AtomicInteger> counters = new HashMap<>();
 
     @Override
-    public String count(String word) {
+    public CountResult count(String word) {
         AtomicInteger counter = counters.computeIfAbsent(word, val -> new AtomicInteger(1));
-        return format(word, counter.getAndIncrement());
+        return CountResult.of(word, counter.getAndIncrement());
     }
 }

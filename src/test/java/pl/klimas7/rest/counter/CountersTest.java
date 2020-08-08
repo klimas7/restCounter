@@ -75,25 +75,27 @@ public class CountersTest {
         count(threadCount, getBadTask(threadCount));
     }
 
-    private void count(final int threadCount, Callable<String> task) throws InterruptedException, ExecutionException {
+    private void count(final int threadCount, Callable<CountResult> task) throws InterruptedException, ExecutionException {
 
-        List<Callable<String>> tasks = Collections.nCopies(threadCount, task);
+        List<Callable<CountResult>> tasks = Collections.nCopies(threadCount, task);
         ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-        List<Future<String>> futures = executorService.invokeAll(tasks);
+        List<Future<CountResult>> futures = executorService.invokeAll(tasks);
 
-        List<String> resultList = new ArrayList<>(futures.size());
-        for (Future<String> future : futures) {
+        List<CountResult> resultList = new ArrayList<>(futures.size());
+        for (Future<CountResult> future : futures) {
             resultList.add(future.get());
         }
 
-        Collections.sort(resultList);
+        resultList.sort((cr1, cr2) -> cr1.getWorld().compareTo(cr2.getWorld()) != 0 ?
+                cr1.getWorld().compareTo(cr2.getWorld()) :
+                cr1.getCount().compareTo(cr2.getCount()));
         LOGGER.log(Level.WARNING, "resultList: " + resultList.toString());
 
-        String expected = NAME + threadCount + " : " + String.format("%07d", 100 * threadCount);
+        CountResult expected = CountResult.of(NAME + threadCount, 100 * threadCount);
         Assert.assertEquals(expected, resultList.get(threadCount - 1));
     }
 
-    private Callable<String> getGoodTask(int threadCount) {
+    private Callable<CountResult> getGoodTask(int threadCount) {
         return () -> {
             for (int i = 0; i < 99; i++) {
                 safeCounter.count(NAME + threadCount);
@@ -102,7 +104,7 @@ public class CountersTest {
         };
     }
 
-    private Callable<String> getBadTask(int threadCount) {
+    private Callable<CountResult> getBadTask(int threadCount) {
         return () -> {
             for (int i = 0; i < 99; i++) {
                 safeCounter.count(NAME + threadCount);
@@ -122,13 +124,13 @@ public class CountersTest {
         ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
         while ((System.currentTimeMillis() - startTime) < timeout) {
             String word = UUID.randomUUID().toString();
-            Callable<String> task = () -> safeCounter.count(word);
-            List<Callable<String>> tasks = Collections.nCopies(nThreads, task);
+            Callable<CountResult> task = () -> safeCounter.count(word);
+            List<Callable<CountResult>> tasks = Collections.nCopies(nThreads, task);
             executorService.invokeAll(tasks);
 
-            Future<String> future = executorService.submit(task);
-            String nextCount = future.get();
-            String expectedNextCount = format(word, nThreads + 1);
+            Future<CountResult> future = executorService.submit(task);
+            CountResult nextCount = future.get();
+            CountResult expectedNextCount = CountResult.of(word, nThreads + 1);
             if (!nextCount.equals(expectedNextCount)) {
                 Assert.assertEquals(expectedNextCount, nextCount);
             }
